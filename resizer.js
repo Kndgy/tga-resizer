@@ -27,22 +27,22 @@ function resizeTGAFilesFromFolder(inputFolderPath, outputFolderPath) {
           const width = data.readUInt16LE(12);
           const height = data.readUInt16LE(14);
           console.log(`${file}: ${width}x${height}`);
-          
+
           const tga = new TGA(data);
-          const newWidth = Math.floor(width / 4) * 4;
-          const newHeight = Math.floor(height / 4) * 4;
+          const newWidth = Math.ceil(width / 4) * 4;
+          const newHeight = Math.ceil(height / 4) * 4;
           const resizedPixels = new Uint8Array(newWidth * newHeight * 4);
-          for (let i = 0; i < newHeight; i++) {
+          for (let i = 0; i < height; i++) {
             const srcRowOffset = i * width * 4;
             const dstRowOffset = i * newWidth * 4;
-            for (let j = 0; j < newWidth * 4; j++) {
+            for (let j = 0; j < width * 4; j++) {
               resizedPixels[dstRowOffset + j] = tga.pixels[srcRowOffset + j];
             }
           }
-          
+
           const resizedData = TGA.createTgaBuffer(newWidth, newHeight, resizedPixels);
           fs.writeFileSync(outputFile, resizedData);
-          
+
           count++;
           if (count === files.filter(f => path.extname(f) === '.TGA').length) {
             console.log(`Total files: ${count}`);
